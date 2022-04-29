@@ -1,6 +1,6 @@
 #include <iostream>
 #include <ctime>
-#include <mpi.h>
+#include "mpi.h"
 
 void printArray(int *arr)
 {
@@ -96,7 +96,6 @@ void fillPoints(int *lapTime, int *lapPoints)
 
 int main(int argc, char **argv)
 {
-
     // 5 processes!!!
 
     srand(time(0));
@@ -158,33 +157,45 @@ int main(int argc, char **argv)
     }
 
     int result[3] = {0, 0, 0};
-    MPI_Allreduce(resultPoints, result, MPI_INT, MPI_SUM) 
+    // MPI_Allreduce(resultPoints, result, 3, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
     for (int j = 0; j < 3; ++j)
     {
-        MPI_Allreduce(resultPoints)
+        MPI_Allreduce(&resultPoints[j], &result[j], 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     }
 
     int given_places[3] = {0, 0, 0};
     int first_place = 10000;
     int max_points = 0;
 
-    printArray(resultPoints);
-
-    for (int k = 0; k < 3; ++k)
+    if (procRank == 0)
     {
-        max_points = 0;
-        for (int i = 0; i < 3; i++)
-        {
-            if (resultPoints[i] >= max_points && given_places[i] == 0)
-            {
-                max_points = resultPoints[i];
-                first_place = i;
-            }
-        }
-        given_places[first_place] = k + 1;
+        printArray(result);
     }
 
-    printArray(given_places);
+    if (procRank == 0)
+    {
+        for (int k = 0; k < 3; ++k)
+        {
+            max_points = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                if (result[i] >= max_points && given_places[i] == 0)
+                {
+                    max_points = result[i];
+                    first_place = i;
+                }
+            }
+            given_places[first_place] = k + 1;
+        }
+    }
+
+    if (procRank == 0)
+    {
+        printArray(given_places);
+    }
+
+    MPI_Finalize();
 
     return 0;
 }
