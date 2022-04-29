@@ -104,7 +104,7 @@ int main(int argc, char **argv)
     {
         for (int j = 0; j < 3; ++j)
         {
-            bloknot[i * 3 + j] = (rand() % 7 != 0) ? ((3 + rand()) % 10) : 0;
+            bloknot[i * 3 + j] = (rand() % 7 != 0) ? ((3 + rand()) % 7) : 0; // from 3 to 10
         }
     }
 
